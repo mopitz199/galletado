@@ -1,7 +1,32 @@
+'use client'
+
 import Image from "next/image";
 import styles from "./page.module.css";
+import { db } from "../configs/firebase";
+import { getDocs, collection } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [tries, setTrie] = useState([]);
+
+  const triesCollectionRef = collection(db, "tries")
+
+  useEffect(() => {
+    const getTries = async () => {
+      try {
+        const data = await getDocs(triesCollectionRef)
+        const filteredData = data.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }))
+        console.log(filteredData);
+      } catch (err) {
+        console.error(err);
+      } 
+    }
+    getTries();
+  }, [])
+  
   return (
     <div className={styles.page}>
       <main className={styles.main}>
