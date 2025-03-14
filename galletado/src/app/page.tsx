@@ -3,13 +3,17 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import { db } from "../configs/firebase";
+import { fileStorage } from "../configs/firebase";
 import { getDocs, collection } from "firebase/firestore";
+import { listAll, ref, getDownloadURL } from "firebase/storage";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [tries, setTrie] = useState([]);
+  const [fileURL, setFileURL] = useState("/next.svg");
 
   const triesCollectionRef = collection(db, "tries")
+  const fileRef = ref(fileStorage, "")
 
   useEffect(() => {
     const getTries = async () => {
@@ -24,12 +28,35 @@ export default function Home() {
         console.error(err);
       } 
     }
+
+
+    const getFiles = async () => {
+      try {
+        const data = await listAll(fileRef)
+        data.items.map((file) => {
+          getDownloadURL(file).then((url) => {
+            setFileURL(url);
+            console.log(url);
+          })
+        })
+      } catch (err) {
+        console.error(err);
+      } 
+    }
+
     getTries();
+    getFiles();
   }, [])
   
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <Image
+          src={fileURL}
+          alt="Next.js logo"
+          fill={true}
+          priority
+        />
         <Image
           className={styles.logo}
           src="/next.svg"
